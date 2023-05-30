@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <br>
+
+    <div class="col-md-8 offset-md-2">
+    
+    <!--check if user is signed in else display the login form-->
+    {% if user.is_authenticated %}
+
+      <h1>Go Fuel Payments Records</h1>
+
+
+        <table class="table table-striped table-hover table-bordered">
+  <thead class="table-dark">
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Name</th>
+      <th scope="col">Station</th>
+      <th scope="col">Email</th>
+      <th scope="col">Phone Number</th>
+      <th scope="col">Transaction Time</th>
+    </tr>
+  </thead>
+  <tbody>
+       {% if payments %}
+
+            {% for payment in payments %}
+
+                <tr>
+                 <td><a href="{% url 'client-record'  payment.id %}"> {{ payment.id }} </a></td>
+
+            <td>{{ payment.first_name }} {{ payment.last_name }}</td>
+
+               <td>{{ payment.email }} </td>
+              <td>  {{ payment.phonenumber }} </td>
+              <td>  {{ payment.station_name }} </td>
+
+                </tr>
+
+            {% endfor %}
+
+        {% endif %}
+
+
+  {% else %}
+
+
+
+
+  </tbody>
+</table>
+
+
+
+
+    <h1>Login</h1>
+
+        <form action="{% url 'home' %}" method="post">
+            {% csrf_token %}
+
+
+
+            <form>
+  <div class="mb-3">
+    <label for="exampleInputEmail1" class="form-label">Username</label>
+    <input type="text" class="form-control" name="username">
+
+  </div>
+  <div class="mb-3">
+    <label for="exampleInputPassword1" class="form-label">Password</label>
+    <input type="password" name="password" class="form-control">
+  </div>
+
+  <button type="submit" class="btn btn-primary">Login</button>
+</form>
+        </form>
+
+    </div>
+
+ {% endif %}
+
+
+{% endblock %}
