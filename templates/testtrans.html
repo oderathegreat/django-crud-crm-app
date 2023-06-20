@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="col-md-6 offset-md-3">
+<h1>Demo Transactions</h1>
+<br/>
+
+<form method="POST" action="{% url 'tests' %}">
+	{% csrf_token %}
+
+    <input type="text" class="form-control" placeholder="Transaction Code" name="transcode">
+    <input type="text" class="form-control" placeholder="Amount" name="amount">
+
+
+<br/>
+  <button type="submit" class="btn btn-secondary">Save Data</button>
+</form>
+
+</div>
+
+{% endblock %}

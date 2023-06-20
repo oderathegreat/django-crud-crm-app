@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 
 # django auth system
@@ -11,6 +12,17 @@ from .forms import SignUpForm, AddRecordForm
 
 # display record from our payments table
 from .models import Payment
+
+# view set from rest-framework
+from rest_framework import viewsets
+
+from .serializers import TransSerializer
+from .models import Trans
+
+
+class Transdata(viewsets.ModelViewSet):
+    queryset = Trans.objects.all().order_by('amount')
+    serializer_class = TransSerializer
 
 
 def home(request):
@@ -40,7 +52,7 @@ def login_user(request):
 
 def logout_user(request):
     logout(request)
-    messages.success(request, "You Have Been Logged Out")
+    messages.success(request, "You Have Been Logged Out ")
     return redirect('home')
 
 
@@ -83,15 +95,49 @@ def deleteRecord(request, pk):
 
 
 def add_record(request):
-    form = AddRecordForm(request.POST or None)
-    if request.user.is_authenticated:
-        if request.method == "POST":
-            if form.is_valid():
-                add_record = form.save()
-                messages.success(request, "Record Added Successfully")
-                return redirect('home')
+    if not request.user.is_authenticated:
+        messages.error(request, "You must be logged in to view the record")
+        return redirect('home')
 
-    else:
-        messages.success(request, "You Must be Logged in to add Record")
+    form = AddRecordForm(request.POST or None)
+
+    if request.method == "POST":
+        if form.is_valid():
+            add_record = form.save()
+            messages.success(request, "Record added successfully")
+            return redirect('/')
 
     return render(request, "add_record.html", {'form': form})
+
+
+# perform migrations for test transactions
+def test_transactions(request):
+    if not request.user.is_authenticated:
+        messages.error(request, "Sorry, you must be logged in first")
+        return redirect('home')
+
+    if request.method == "POST":
+        amount = request.POST.get('amount')
+        transcode = request.POST.get('transcode')
+
+        trans_data = Trans(amount=amount, transcode=transcode, user=request.user)
+        trans_data.save()
+        messages.success(request, "Transaction data saved successfully")
+
+    return render(request, "testtrans.html")
+
+
+def login_api(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return JsonResponse({'message': 'Login successful'})
+        else:
+            return JsonResponse({'message': 'Invalid credentials'}, status=401)
+
+    return JsonResponse({'message': 'Invalid request'}, status=400)
